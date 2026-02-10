@@ -1,11 +1,10 @@
 #!/bin/sh
 set -e
 
-echo "Generating Prisma client..."
-npx prisma generate
+echo "🚀 Starting Lane Backend..."
 
-echo "Running database migrations..."
-npx prisma db push --accept-data-loss --skip-generate
+# Prisma client is already generated in Docker build
+# NO migrations run in production - they happen locally only
 
-echo "Starting application..."
-node dist/main
+echo "✅ Starting NestJS application..."
+exec node dist/main

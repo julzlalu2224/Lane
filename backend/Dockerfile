@@ -37,9 +37,12 @@ COPY backend/prisma ./prisma/
 # Install production dependencies only
 RUN npm install --omit=dev
 
+# Generate Prisma client in production stage
+# This ensures the client matches the production node_modules
+RUN npx prisma generate
+
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy startup script
 COPY backend/start.sh ./
