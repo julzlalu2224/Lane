@@ -42,11 +42,11 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy startup script
-COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+COPY start.sh ./
+RUN chmod +x start.sh
 
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["./docker-entrypoint.sh"]
+CMD ["./start.sh"]
