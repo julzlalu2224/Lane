@@ -7,14 +7,14 @@ WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
 
 # Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY backend/package*.json ./
+COPY backend/prisma ./prisma/
 
 # Install dependencies
 RUN npm install
 
 # Copy source code
-COPY . .
+COPY backend/ .
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -31,8 +31,8 @@ WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
 
 # Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY backend/package*.json ./
+COPY backend/prisma ./prisma/
 
 # Install production dependencies only
 RUN npm install --omit=dev
@@ -42,7 +42,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy startup script
-COPY start.sh ./
+COPY backend/start.sh ./
 RUN chmod +x start.sh
 
 # Expose port
