@@ -7,4 +7,4 @@ echo "🚀 Starting Lane Backend..."
 # NO migrations run in production - they happen locally only
 
 echo "✅ Starting NestJS application..."
-exec node dist/main
+exec node dist/src/main
