@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: lane-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lane_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lane-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lane-backend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/lane_db?schema=public
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      PORT: 3000
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      - postgres
+    networks:
+      - lane-network
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm run start:dev"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lane-frontend
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - lane-network
+
+volumes:
+  postgres_data:
+
+networks:
+  lane-network:
+    driver: bridge

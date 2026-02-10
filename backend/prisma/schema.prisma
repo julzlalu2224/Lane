@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum StockChangeType {
+  SALE
+  ADJUSTMENT
+  RESTOCK
+  RETURN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Supplier {
+  id        String    @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("suppliers")
+}
+
+model Product {
+  id         String      @id @default(uuid())
+  name       String
+  sku        String      @unique
+  price      Float
+  cost       Float
+  stock      Int         @default(0)
+  minStock   Int         @default(10)
+  categoryId String
+  supplierId String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  supplier   Supplier    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  saleItems  SaleItem[]
+  stockLogs  StockLog[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+  @@map("products")
+}
+
+model Sale {
+  id        String     @id @default(uuid())
+  total     Float
+  profit    Float
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     SaleItem[]
+
+  @@index([createdAt])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Int
+  price     Float
+  cost      Float
+  subtotal  Float
+  profit    Float
+  createdAt DateTime @default(now())
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+model StockLog {
+  id         String          @id @default(uuid())
+  productId  String
+  changeType StockChangeType
+  quantity   Int
+  before     Int
+  after      Int
+  notes      String?
+  createdAt  DateTime        @default(now())
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_logs")
+}
