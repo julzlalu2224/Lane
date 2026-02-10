@@ -5,6 +5,6 @@
     "dockerfile": "backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "cd backend && ./start.sh"
+    "startCommand": "./start.sh"
   }
 }
