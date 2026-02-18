@@ -14,21 +14,30 @@ async function bootstrap() {
       .map((origin) => origin.trim())
       .filter(Boolean),
     'http://localhost:5173',
+    'http://localhost:3000',
   ];
+
+  console.log('🌐 Allowed CORS origins:', allowedOrigins);
 
   app.enableCors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman, curl)
       if (!origin) {
         return callback(null, true);
       }
 
+      // Check if origin is allowed
       if (allowedOrigins.includes(origin)) {
+        console.log(`✅ CORS allowed for: ${origin}`);
         return callback(null, true);
       }
 
+      console.warn(`❌ CORS blocked for origin: ${origin}`);
       return callback(new Error(`CORS blocked for origin: ${origin}`), false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global validation pipe
